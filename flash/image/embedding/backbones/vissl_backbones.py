@@ -34,6 +34,7 @@ def vision_transformer_trunk(
     qkv_bias: bool = False,
     qk_scale: bool = False,
     classifier: str = 'token',
+    **kwargs,
 ) -> nn.Module:
 
     cfg = AttrDict({

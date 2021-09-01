@@ -52,7 +52,7 @@ def test_load_from_checkpoint_dependency_error():
 @pytest.mark.skipif(not (_TORCHVISION_AVAILABLE and _VISSL_AVAILABLE), reason="vissl not installed.")
 def test_dino_training(tmpdir):
     train_dataloader = ssl_train_loader()
-    embedder = ImageEmbedder(backbone="resnet50", loss_fn="dino_loss", heads="swav_head")
+    embedder = ImageEmbedder(backbone="vision_transformer", loss_fn="dino_loss", heads="swav_head")
 
     trainer = flash.Trainer(max_steps=3, gpus=torch.cuda.device_count())
     trainer.fit(embedder, train_dataloader=train_dataloader)

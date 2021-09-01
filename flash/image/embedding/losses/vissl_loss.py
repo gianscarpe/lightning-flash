@@ -32,6 +32,7 @@ def dino_loss(
     crops_for_teacher: List[int] = [0, 1],
     ema_center: float = 0.9,
     normalize_last_layer: bool = False,
+    **kwargs,
 ) -> ClassyLoss:
     cfg = {
         "num_crops": num_crops,

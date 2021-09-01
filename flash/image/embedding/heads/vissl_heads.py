@@ -35,6 +35,7 @@ def swav_head(
     use_weight_norm_prototypes: bool = False,
     batchnorm_eps: float = 1e-5,
     batchnorm_momentum: float = 0.1,
+    **kwargs,
 ) -> nn.Module:
     cfg = {
         "model_config": AttrDict({
