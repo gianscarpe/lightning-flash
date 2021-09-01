@@ -11,9 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import torch.nn as nn
-
 from typing import List
+
+import torch.nn as nn
 from attrdict import AttrDict
 
 from flash.core.registry import FlashRegistry
@@ -38,9 +38,9 @@ def swav_head(
     **kwargs,
 ) -> nn.Module:
     cfg = {
-        "model_config": AttrDict({
-            "HEAD": AttrDict({"BATCHNORM_EPS": batchnorm_eps, "BATCHNORM_MOMENTUM": batchnorm_momentum})
-        }),
+        "model_config": AttrDict(
+            {"HEAD": AttrDict({"BATCHNORM_EPS": batchnorm_eps, "BATCHNORM_MOMENTUM": batchnorm_momentum})}
+        ),
         "dims": dims,
         "use_bn": use_bn,
         "num_clusters": num_clusters,

@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import flash
 from typing import Any, Callable, Mapping, Optional, Sequence, Type, Union
 
 import torch
@@ -20,6 +19,7 @@ from torch import nn
 from torch.nn import functional as F
 from torchmetrics import Metric
 
+import flash
 from flash.core.adapter import Adapter, AdapterTask
 from flash.core.data.process import Preprocess
 from flash.core.registry import FlashRegistry
@@ -27,8 +27,8 @@ from flash.core.utilities.imports import _IMAGE_AVAILABLE, _VISSL_AVAILABLE
 
 if _VISSL_AVAILABLE and _IMAGE_AVAILABLE:
     from flash.image.embedding.backbones import IMAGE_CLASSIFIER_BACKBONES
-    from flash.image.embedding.losses import IMAGE_EMBEDDER_LOSS_FUNTIONS
     from flash.image.embedding.heads import IMAGE_EMBEDDER_HEADS
+    from flash.image.embedding.losses import IMAGE_EMBEDDER_LOSS_FUNTIONS
 else:
     IMAGE_CLASSIFIER_BACKBONES = FlashRegistry("backbones")
     IMAGE_EMBEDDER_LOSS_FUNTIONS = FlashRegistry("loss_functions")
