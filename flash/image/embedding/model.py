@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from flash.image.classification import backbones
 from typing import Any, Callable, Mapping, Optional, Sequence, Type, Union
 
 import torch
@@ -25,6 +24,7 @@ from flash.core.adapter import Adapter, AdapterTask
 from flash.core.data.process import Preprocess
 from flash.core.registry import FlashRegistry
 from flash.core.utilities.imports import _VISSL_AVAILABLE
+from flash.image.classification import backbones
 
 if _VISSL_AVAILABLE:
     from flash.image.embedding.backbones import IMAGE_EMBEDDER_BACKBONES
@@ -91,7 +91,7 @@ class ImageEmbedder(AdapterTask):
         # assert embedding_dim == num_features
 
         metadata = self.loss_fns_registry.get(loss_fn, with_metadata=True)
-        loss_fn = metadata['fn']
+        loss_fn = metadata["fn"]
         # get hooks, pass hook to adapter
         hooks = metadata["metadata"]["hooks"]
         adapter = metadata["metadata"]["adapter"].from_task(

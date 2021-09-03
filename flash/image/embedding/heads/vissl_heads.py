@@ -57,4 +57,4 @@ def swav_head(
 
 
 def register_vissl_heads(register: FlashRegistry):
-    register(swav_head, name='swav_head')
+    register(swav_head, name="swav_head")

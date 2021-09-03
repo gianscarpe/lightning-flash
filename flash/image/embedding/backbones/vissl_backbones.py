@@ -33,16 +33,16 @@ def vision_transformer_trunk(
     drop_path_rate: float = 0,
     qkv_bias: bool = False,
     qk_scale: bool = False,
-    classifier: str = 'token',
+    classifier: str = "token",
     **kwargs,
 ) -> nn.Module:
 
     cfg = AttrDict(
         {
-            "model_name": 'vision_transformer',
+            "model_name": "vision_transformer",
             "model_config": AttrDict(
                 {
-                    "INPUT_TYPE": 'rgb',
+                    "INPUT_TYPE": "rgb",
                     "TRUNK": AttrDict(
                         {
                             "VISION_TRANSFORMERS": AttrDict(
@@ -62,9 +62,9 @@ def vision_transformer_trunk(
                                 }
                             )
                         }
-                    )
+                    ),
                 }
-            )
+            ),
         }
     )
 
@@ -73,4 +73,4 @@ def vision_transformer_trunk(
 
 
 def register_vissl_backbones(register: FlashRegistry):
-    register(vision_transformer_trunk, name='vision_transformer')
+    register(vision_transformer_trunk, name="vision_transformer")

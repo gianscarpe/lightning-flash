@@ -52,4 +52,4 @@ def dino_loss(
 def register_vissl_losses(register: FlashRegistry):
     # for loss_fn in (dino_loss):
     #     register(loss_fn, adapter=VISSLAdapter)
-    register(dino_loss, name='dino_loss', adapter=VISSLAdapter, hooks=[DINOHook()])
+    register(dino_loss, name="dino_loss", adapter=VISSLAdapter, hooks=[DINOHook()])

@@ -12,20 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import functools
+from typing import Any, Callable, Dict, List, Optional, Sequence, Union
+
 import torch
-
-from torch.utils.data import DataLoader, Sampler
-from flash.image.embedding.heads import vissl_heads
-from attrdict.dictionary import AttrDict
 import torch.nn as nn
-from typing import Any, Callable, Sequence, Union, List, Dict, Optional
+from attrdict.dictionary import AttrDict
+from torch.utils.data import DataLoader, Sampler
 
-from flash.core.data.data_source import DefaultDataKeys
 from flash.core.adapter import Adapter
 from flash.core.data.auto_dataset import BaseAutoDataset
+from flash.core.data.data_source import DefaultDataKeys
 from flash.core.model import Task
 from flash.core.utilities.imports import _VISSL_AVAILABLE
 from flash.core.utilities.url_error import catch_url_error
+from flash.image.embedding.heads import vissl_heads
 
 if _VISSL_AVAILABLE:
     from classy_vision.losses import build_loss, ClassyLoss
@@ -73,7 +73,7 @@ class VISSLAdapter(Adapter, AdaptVISSLHooks):
         # vissl_model = BaseSSLMultiInputOutputModel(model_config, optimizer_config)
         # vissl_model.base_model = backbone
         # vissl_model.heads = nn.ModuleList([heads] if not isinstance(heads, List) else heads)
-        return cls(vissl_trunk=backbone, vissl_heads=heads, vissl_loss=loss_fn, hooks=kwargs['hooks'])
+        return cls(vissl_trunk=backbone, vissl_heads=heads, vissl_loss=loss_fn, hooks=kwargs["hooks"])
 
     def forward(self, batch) -> Any:
         # TODO: ["res5", ["AdaptiveAvgPool2d", [[1, 1]]]] for CNNs
@@ -91,9 +91,7 @@ class VISSLAdapter(Adapter, AdaptVISSLHooks):
     def multi_res_input_forward(self, batch, feature_names, heads):
         assert isinstance(batch, list)
         idx_crops = torch.cumsum(
-            torch.unique_consecutive(
-                torch.tensor([inp.shape[-1] for inp in batch]), return_counts=True
-            )[1],
+            torch.unique_consecutive(torch.tensor([inp.shape[-1] for inp in batch]), return_counts=True)[1],
             0,
         )
 
@@ -103,7 +101,7 @@ class VISSLAdapter(Adapter, AdaptVISSLHooks):
         # crop as well. Set the flag to be true.
         # if self.model_config.SINGLE_PASS_EVERY_CROP:
         idx_crops = torch.Tensor(list(range(1, 1 + len(batch)))).int()
-        
+
         for end_idx in idx_crops:
             feat = self.vissl_trunk(torch.cat(batch[start_idx:end_idx]), feature_names)
             start_idx = end_idx
@@ -131,9 +129,7 @@ class VISSLAdapter(Adapter, AdaptVISSLHooks):
             # our model is multiple output.
             return [output]
         else:
-            raise AssertionError(
-                f"Mismatch in #head: {len(heads)} and #features: {len(feats)}"
-            )
+            raise AssertionError(f"Mismatch in #head: {len(heads)} and #features: {len(feats)}")
 
     def training_step(self, batch: Any, batch_idx: int) -> Any:
         out = self(batch)
