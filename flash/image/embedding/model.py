@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from flash.image.classification import backbones
 from typing import Any, Callable, Mapping, Optional, Sequence, Type, Union
 
 import torch
@@ -23,14 +24,14 @@ import flash
 from flash.core.adapter import Adapter, AdapterTask
 from flash.core.data.process import Preprocess
 from flash.core.registry import FlashRegistry
-from flash.core.utilities.imports import _IMAGE_AVAILABLE, _VISSL_AVAILABLE
+from flash.core.utilities.imports import _VISSL_AVAILABLE
 
-if _VISSL_AVAILABLE and _IMAGE_AVAILABLE:
-    from flash.image.embedding.backbones import IMAGE_CLASSIFIER_BACKBONES
+if _VISSL_AVAILABLE:
+    from flash.image.embedding.backbones import IMAGE_EMBEDDER_BACKBONES
     from flash.image.embedding.heads import IMAGE_EMBEDDER_HEADS
     from flash.image.embedding.losses import IMAGE_EMBEDDER_LOSS_FUNTIONS
 else:
-    IMAGE_CLASSIFIER_BACKBONES = FlashRegistry("backbones")
+    IMAGE_EMBEDDER_BACKBONES = FlashRegistry("backbones")
     IMAGE_EMBEDDER_LOSS_FUNTIONS = FlashRegistry("loss_functions")
     IMAGE_EMBEDDER_HEADS = FlashRegistry("embedder_heads")
 
@@ -55,19 +56,19 @@ class ImageEmbedder(AdapterTask):
         learning_rate: Learning rate to use for training, defaults to ``1e-3``.
     """
 
-    backbones: FlashRegistry = IMAGE_CLASSIFIER_BACKBONES
-    loss_fns: FlashRegistry = IMAGE_EMBEDDER_LOSS_FUNTIONS
-    heads: FlashRegistry = IMAGE_EMBEDDER_HEADS
+    backbones_registry: FlashRegistry = IMAGE_EMBEDDER_BACKBONES
+    loss_fns_registry: FlashRegistry = IMAGE_EMBEDDER_LOSS_FUNTIONS
+    heads_registry: FlashRegistry = IMAGE_EMBEDDER_HEADS
 
     required_extras: str = "image"
 
     def __init__(
         self,
-        loss_fn: str,
+        loss_fn: Union[str, Callable],
         embedding_dim: Optional[int] = None,
         backbone: str = "resnet50",
         pretrained: bool = True,
-        heads: Optional[Union[nn.Module, nn.ModuleList]] = None,
+        heads: Optional[Union[str, nn.Module, nn.ModuleList]] = None,
         optimizer: Type[torch.optim.Optimizer] = torch.optim.SGD,
         metrics: Optional[Union[Metric, Callable, Mapping, Sequence]] = None,
         learning_rate: float = 1e-3,
@@ -75,28 +76,32 @@ class ImageEmbedder(AdapterTask):
     ):
         self.save_hyperparameters()
 
-        self.backbone, num_features = self.backbones.get(backbone)(pretrained=pretrained)
+        backbone, num_features = self.backbones_registry.get(backbone)(
+            pretrained=pretrained,
+            image_size=224,
+        )
 
-        # get backbones and heads
+        heads = self.heads_registry.get(heads)(
+            dims=[384, 2048, 2048, 256],
+            use_bn=False,
+            num_clusters=3072,
+        )
 
         # TODO: add linear layer to backbone to get num_feature -> embedding_dim before applying heads
-        assert embedding_dim == num_features
+        # assert embedding_dim == num_features
 
-        metadata = self.loss_fns.get(loss_fn, with_metadata=True)
+        metadata = self.loss_fns_registry.get(loss_fn, with_metadata=True)
+        loss_fn = metadata['fn']
         # get hooks, pass hook to adapter
+        hooks = metadata["metadata"]["hooks"]
         adapter = metadata["metadata"]["adapter"].from_task(
             self,
             loss_fn=loss_fn,
             backbone=backbone,
             embedding_dim=embedding_dim,
             heads=heads,
+            hooks=hooks,
             **kwargs,
         )
 
-        super().__init__(
-            adapter=adapter,
-            loss_fn=loss_fn,
-            optimizer=optimizer,
-            metrics=metrics,
-            learning_rate=learning_rate,
-        )
+        super().__init__(adapter=adapter)

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import torch.nn as nn
-from attrdict import AttrDict
+from attrdict.dictionary import AttrDict
 
 from flash.core.registry import FlashRegistry
 from flash.core.utilities.imports import _VISSL_AVAILABLE
@@ -24,7 +24,7 @@ if _VISSL_AVAILABLE:
 def vision_transformer_trunk(
     image_size: int,
     patch_size: int = 16,
-    hidden_dim: int = 768,
+    hidden_dim: int = 384,
     num_layers: int = 12,
     num_heads: int = 12,
     mlp_dim: int = 3072,
@@ -39,22 +39,28 @@ def vision_transformer_trunk(
 
     cfg = AttrDict(
         {
-            "TRUNK": AttrDict(
+            "model_name": 'vision_transformer',
+            "model_config": AttrDict(
                 {
-                    "VISION_TRANSFORMERS": AttrDict(
+                    "INPUT_TYPE": 'rgb',
+                    "TRUNK": AttrDict(
                         {
-                            "image_size": image_size,
-                            "patch_size": patch_size,
-                            "hidden_dim": hidden_dim,
-                            "num_layers": num_layers,
-                            "num_heads": num_heads,
-                            "mlp_dim": mlp_dim,
-                            "dropout_rate": dropout_rate,
-                            "attention_dropout_rate": attention_dropout_rate,
-                            "drop_path_rate": drop_path_rate,
-                            "qkv_bias": qkv_bias,
-                            "qk_scale": qk_scale,
-                            "classifier": classifier,
+                            "VISION_TRANSFORMERS": AttrDict(
+                                {
+                                    "image_size": image_size,
+                                    "patch_size": patch_size,
+                                    "hidden_dim": hidden_dim,
+                                    "num_layers": num_layers,
+                                    "num_heads": num_heads,
+                                    "mlp_dim": mlp_dim,
+                                    "dropout_rate": dropout_rate,
+                                    "attention_dropout_rate": attention_dropout_rate,
+                                    "drop_path_rate": drop_path_rate,
+                                    "qkv_bias": qkv_bias,
+                                    "qk_scale": qk_scale,
+                                    "classifier": classifier,
+                                }
+                            )
                         }
                     )
                 }
@@ -63,8 +69,8 @@ def vision_transformer_trunk(
     )
 
     trunk = MODEL_TRUNKS_REGISTRY["vision_transformer"](**cfg)
-    return trunk
+    return trunk, trunk.num_features
 
 
 def register_vissl_backbones(register: FlashRegistry):
-    register(vision_transformer_trunk)
+    register(vision_transformer_trunk, name='vision_transformer')
